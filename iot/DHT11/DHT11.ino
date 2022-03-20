@@ -4,7 +4,7 @@
 //      VCC: 5V or 3V
 //      GND: GND
 //      DATA: 2
-int pinDHT11 = D4;
+int pinDHT11 = D5;
 SimpleDHT11 dht11(pinDHT11);
 
 void setup() {
