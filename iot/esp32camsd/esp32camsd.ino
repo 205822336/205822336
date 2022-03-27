@@ -44,7 +44,7 @@
 #define HREF_GPIO_NUM     23
 #define PCLK_GPIO_NUM     22
 
-int pictureNumber = 0;
+int picturenum = 0;
 
 void setup() {
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
@@ -114,10 +114,10 @@ void setup() {
   }
   // initialize EEPROM with predefined size
   EEPROM.begin(EEPROM_SIZE);
-  pictureNumber = EEPROM.read(0) + 1;
+  picturenum = EEPROM.read(0) + 1;
 
   // Path where new picture will be saved in SD Card
-  String path = "/picture" + String(pictureNumber) +".jpg";
+  String path = "/picture" + String(picturenum) +".jpg";
 
   fs::FS &fs = SD_MMC; 
   Serial.printf("Picture file name: %s\n", path.c_str());
@@ -129,11 +129,11 @@ void setup() {
   else {
     file.write(fb->buf, fb->len); // payload (image), payload length
     Serial.printf("Saved file to path: %s\n", path.c_str());
-    EEPROM.write(0, pictureNumber);
+    EEPROM.write(0, picturenum);
     EEPROM.commit();
   }
   file.close();
-  esp_camera_fb_return(fb); 
+//  esp_camera_fb_return(fb); 
   
   // Turns off the ESP32-CAM white on-board LED (flash) connected to GPIO 4
 //  pinMode(4, OUTPUT);

@@ -1,19 +1,13 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
 #include "esp_camera.h"
 #include "esp_http_client.h"
 #include <ArduinoJson.h>
-#include "FS.h"                // SD Card ESP32
-#include "SD_MMC.h"            // SD Card ESP32
-#include "soc/soc.h"           // Disable brownour problems
-#include "soc/rtc_cntl_reg.h"  // Disable brownour problems
-#include "driver/rtc_io.h"
-#include <EEPROM.h>            // read and write from flash memory
 
-//wifi信息
 const char* ssid = "mochen";
 const char* password = "12345678";
-
 /***************mochen.top***************/
 //String serverName = "192.168.1.XXX";   // REPLACE WITH YOUR Raspberry Pi IP ADDRESS  替换为您的树莓派 IP 地址
 String serverName = "img.mochen.top";   // OR REPLACE WITH YOUR DOMAIN NAME   或替换为您的域名
@@ -28,48 +22,13 @@ const char*  topic = "mypicture";     //主题名字，可在控制台新建
 const char*  wechatMsg = "";          //如果不为空，会推送到微信，可随意修改，修改为自己需要发送的消息
 const char*  wecomMsg = "";          //如果不为空，会推送到企业微信，推送到企业微信的消息，可随意修改，修改为自己需要发送的消息
 const char*  urlPath = "";           //如果不为空，会生成自定义图片链接，自定义图片上传后返回的图片url，url前一部分为巴法云域名，第二部分：私钥+主题名的md5值，第三部分为设置的图片链接值。
-String UID = "d9855e89bd49313921fa42387cbdac52";  //用户私钥，可在控制台获取,修改为自己的UID
-String TOPIC = "img002";         //主题名字，可在控制台新建
-const int LED_Pin = 4;              //单片机LED引脚值，D2是NodeMcu引脚命名方式，其他esp8266型号将D2改为自己的引脚
-//巴法云服务器地址默认即可
-#define TCP_SERVER_ADDR "bemfa.com"
-//服务器端口，tcp创客云端口8344
-#define TCP_SERVER_PORT "8344"
 /********************************************************/
 const char*  post_url = "http://images.bemfa.com/upload/v1/upimages.php"; // 默认上传地址
 static String httpResponseString;//接收服务器返回信息
 bool internet_connected = false;
 long current_millis;
 long last_capture_millis = 0;
-
-
-//最大字节数
-#define MAX_PACKETSIZE 512
-//设置心跳值30s
-#define KEEPALIVEATIME 30*1000
-//相关函数初始化
-//连接WIFI
-void doWiFiTick();
-void startSTA();
-//TCP初始化连接
-void doTCPClientTick();
-void startTCPClient();
-void sendtoTCPServer(String p);
-//led 控制函数
-void turnOnLed();
-void turnOffLed();
-
-//tcp客户端相关初始化，默认即可
-WiFiClient TCPclient;
-String TcpClient_Buff = "";
-unsigned int TcpClient_BuffIndex = 0;
-unsigned long TcpClient_preTick = 0;
-unsigned long preHeartTick = 0;//心跳
-unsigned long preTCPStartTick = 0;//连接
-bool preTCPConnected = false;
-
-// define the number of bytes you want to access 定义要访问的字节数
-#define EEPROM_SIZE 60
+#define LED_Pin     4
 // CAMERA_MODEL_AI_THINKER
 #define PWDN_GPIO_NUM     32
 #define RESET_GPIO_NUM    -1
@@ -89,32 +48,25 @@ bool preTCPConnected = false;
 #define HREF_GPIO_NUM     23
 #define PCLK_GPIO_NUM     22
 
-const int timerInterval = 40000;    // 每个 HTTP POST 映像之间的时间
-unsigned long previousMillis = 0;   // 上次发送图像的时间
-const int timeinterval = 50000;    // 每次SD保存之间的时间
-unsigned long pretime = 0;   //上次SD保存图像的时间
-int pictureNumber = 0;
+const int timerInterval = 60000;    // time between each HTTP POST image  每个 HTTP POST 映像之间的时间
+unsigned long previousMillis = 0;   // last time image was sent  上次发送图像的时间
 
 void setup() {
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); 
   Serial.begin(115200);
-  
-  // Turns off the ESP32-CAM white on-board LED (flash) connected to GPIO 4
-  pinMode(4, OUTPUT);
-  digitalWrite(4, LOW);
-  
+
   WiFi.mode(WIFI_STA);
-//  Serial.println();
-//  Serial.print("Connecting to ");
-//  Serial.println(ssid);
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
   WiFi.begin(ssid, password);  
   while (WiFi.status() != WL_CONNECTED) {
-//    Serial.print(".");
+    Serial.print(".");
     delay(500);
   }
-//  Serial.println();
-//  Serial.print("ESP32-CAM IP Address: ");
-//  Serial.println(WiFi.localIP());
+  Serial.println();
+  Serial.print("ESP32-CAM IP Address: ");
+  Serial.println(WiFi.localIP());
 
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
@@ -152,11 +104,11 @@ void setup() {
   // camera init
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
-//    Serial.printf("Camera init failed with error 0x%x", err);
+    Serial.printf("Camera init failed with error 0x%x", err);
     delay(1000);
     ESP.restart();
   }
-  pinMode(LED_Pin,OUTPUT);//初始化LED
+
   sendPhoto(); 
 }
 
@@ -172,15 +124,7 @@ void loop() {
     last_capture_millis = millis();
     take_send_photo();
   }//巴法云
-
-//  unsigned long cmillis = millis();
-//  if (cmillis - pretime >= timeinterval) {
-//    sdcome();
-//    pretime = cmillis;
-//  }//保存到SD卡
   
-//  doWiFiTick();
-//  doTCPClientTick();
 }
 
 String sendPhoto() //图片推送到mochen.top
@@ -191,15 +135,15 @@ String sendPhoto() //图片推送到mochen.top
   camera_fb_t * fb = NULL;
   fb = esp_camera_fb_get();
   if(!fb) {
-//    Serial.println("Camera capture failed");
+    Serial.println("Camera capture failed");
     delay(1000);
     ESP.restart();
   }
   
-//  Serial.println("Connecting to server: " + serverName);
+  Serial.println("Connecting to server: " + serverName);
 
   if (client.connect(serverName.c_str(), serverPort)) {
-//    Serial.println("Connection successful!");    
+    Serial.println("Connection successful!");    
     String head = "--RandomNerdTutorials\r\nContent-Disposition: form-data; name=\"imageFile\"; filename=\"esp32-cam.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n";
     String tail = "\r\n--RandomNerdTutorials--\r\n";
 
@@ -235,7 +179,7 @@ String sendPhoto() //图片推送到mochen.top
     boolean state = false;
     
     while ((startTimer + timoutTimer) > millis()) {
-//      Serial.print(".");
+      Serial.print(".");
       delay(100);      
       while (client.available()) {
         char c = client.read();
@@ -249,13 +193,13 @@ String sendPhoto() //图片推送到mochen.top
       }
       if (getBody.length()>0) { break; }
     }
-//    Serial.println();
+    Serial.println();
     client.stop();
-//    Serial.println(getBody);
+    Serial.println(getBody);
   }
   else {
     getBody = "Connection to " + serverName +  " failed.";
-//    Serial.println(getBody);
+    Serial.println(getBody);
   }
   return getBody;
 }
@@ -273,13 +217,13 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 /********推送图片到巴法云*********/
 static esp_err_t take_send_photo()
 {
-//  Serial.println("Taking picture...");
+  Serial.println("Taking picture...");
   camera_fb_t * fb = NULL;
   esp_err_t res = ESP_OK;
 
   fb = esp_camera_fb_get();
   if (!fb) {
-//    Serial.println("Camera capture failed");
+    Serial.println("Camera capture failed");
     return ESP_FAIL;
   }
 
@@ -303,213 +247,12 @@ static esp_err_t take_send_photo()
     StaticJsonDocument<200> doc;
     DeserializationError error = deserializeJson(doc, httpResponseString);
     if (error) {
-//      Serial.print(F("deserializeJson() failed: "));
-//      Serial.println(error.c_str());
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.c_str());
     }
     String url = doc["url"];
-//    Serial.println(url);//打印获取的URL
+    Serial.println(url);//打印获取的URL
   }
   esp_http_client_cleanup(http_client);
   esp_camera_fb_return(fb);
-}
-
-void sdcome()//保存到SD卡
-{
-
-    if(!SD_MMC.begin()){//初始化SD卡
-    Serial.println("SD Card Mount Failed");
-    return;
-  }
-  uint8_t cardType = SD_MMC.cardType();
-  if(cardType == CARD_NONE){
-    Serial.println("No SD Card attached");
-    return;
-  }
-  pinMode(LED_Pin,OUTPUT);//初始化LED
-  
-  camera_fb_t * fb = NULL;
-  // Take Picture with Camera
-  fb = esp_camera_fb_get();  
-  if(!fb) {
-    Serial.println("Camera capture failed");
-    return;
-  }
-  // initialize EEPROM with predefined size
-  EEPROM.begin(EEPROM_SIZE);
-  pictureNumber = EEPROM.read(0) + 1;
-
-  // Path where new picture will be saved in SD Card
-  String path = "/picture" + String(pictureNumber) +".jpg";
-
-  fs::FS &fs = SD_MMC; 
-  Serial.printf("Picture file name: %s\n", path.c_str());
-  
-  File file = fs.open(path.c_str(), FILE_WRITE);
-  if(!file){
-    Serial.println("Failed to open file in writing mode");
-  } 
-  else {
-    file.write(fb->buf, fb->len); // payload (image), payload length
-    Serial.printf("Saved file to path: %s\n", path.c_str());
-    EEPROM.write(0, pictureNumber);
-    EEPROM.commit();
-  }
-  file.close();
-  esp_camera_fb_return(fb); 
-//  rtc_gpio_hold_en(GPIO_NUM_4);
-  delay(2000);
-//  Serial.println("Going to sleep now");
-//  delay(2000);
-//  esp_deep_sleep_start();
-//  Serial.println("This will never be printed");
-}
-
-/*
-  *发送数据到TCP服务器
- */
-//void sendtoTCPServer(String p){
-//  
-//  if (!TCPclient.connected()) 
-//  {
-//    Serial.println("Client is not readly");
-//    return;
-//  }
-//  TCPclient.print(p);
-//  Serial.println("[Send to TCPServer]:String");
-//  Serial.println(p);
-//}
-//
-//
-///*
-//  *初始化和服务器建立连接
-//*/
-//void startTCPClient(){
-//  if(TCPclient.connect(TCP_SERVER_ADDR, atoi(TCP_SERVER_PORT))){
-//    Serial.print("\nConnected to server:");
-//    Serial.printf("%s:%d\r\n",TCP_SERVER_ADDR,atoi(TCP_SERVER_PORT));
-//    
-//    String tcpTemp="";  //初始化字符串
-//    tcpTemp = "cmd=1&uid="+UID+"&topic="+TOPIC+"\r\n"; //构建订阅指令
-//    sendtoTCPServer(tcpTemp); //发送订阅指令
-//    tcpTemp="";//清空
-//    
-//    preTCPConnected = true;
-//    preHeartTick = millis();
-//    TCPclient.setNoDelay(true);
-//  }
-//  else{
-//    Serial.print("Failed connected to server:");
-//    Serial.println(TCP_SERVER_ADDR);
-//    TCPclient.stop();
-//    preTCPConnected = false;
-//  }
-//  preTCPStartTick = millis();
-//}
-
-
-///*
-//  *检查数据，发送心跳
-//*/
-//void doTCPClientTick(){
-// //检查是否断开，断开后重连
-//   if(WiFi.status() != WL_CONNECTED) return;
-//
-//
-//  if (!TCPclient.connected()) {//断开重连
-//  if(preTCPConnected == true){
-//
-//    preTCPConnected = false;
-//    preTCPStartTick = millis();
-//    Serial.println();
-//    Serial.println("TCP Client disconnected.");
-//    TCPclient.stop();
-//  }
-//  else if(millis() - preTCPStartTick > 1*1000)//重新连接
-//    startTCPClient();
-//  }
-//  else
-//  {
-//    if (TCPclient.available()) {//收数据
-//      char c =TCPclient.read();
-//      TcpClient_Buff +=c;
-//      TcpClient_BuffIndex++;
-//      TcpClient_preTick = millis();
-//      
-//      if(TcpClient_BuffIndex>=MAX_PACKETSIZE - 1){
-//        TcpClient_BuffIndex = MAX_PACKETSIZE-2;
-//        TcpClient_preTick = TcpClient_preTick - 200;
-//      }
-//      preHeartTick = millis();
-//    }
-//    if(millis() - preHeartTick >= KEEPALIVEATIME){//保持心跳
-//      preHeartTick = millis();
-//      Serial.println("--Keep alive:");
-//      sendtoTCPServer("cmd=0&msg=keep\r\n");
-//    }
-//  }
-//  if((TcpClient_Buff.length() >= 1) && (millis() - TcpClient_preTick>=200))
-//  {//data ready
-//    TCPclient.flush();
-//    Serial.println("Buff");
-//    Serial.println(TcpClient_Buff);
-//    if((TcpClient_Buff.indexOf("&msg=on") > 0)) {
-//      turnOnLed();
-//    }else if((TcpClient_Buff.indexOf("&msg=off") > 0)) {
-//      turnOffLed();
-//    }
-//   TcpClient_Buff="";
-//   TcpClient_BuffIndex = 0;
-//  }
-//}
-//
-//void startSTA(){
-//  WiFi.disconnect();
-//  WiFi.mode(WIFI_STA);
-//  WiFi.begin(ssid, password); 
-//}
-//
-//
-//
-//  WiFiTick
-//  检查是否需要初始化WiFi
-//  检查WiFi是否连接上，若连接成功启动TCP Client
-//  控制指示灯
-//*/
-//void doWiFiTick(){
-//  static bool startSTAFlag = false;
-//  static bool taskStarted = false;
-//  static uint32_t lastWiFiCheckTick = 0;
-//
-//  if (!startSTAFlag) {
-//    startSTAFlag = true;
-//    startSTA();
-//    Serial.printf("Heap size:%d\r\n", ESP.getFreeHeap());
-//  }
-//
-//  //未连接1s重连
-//  if ( WiFi.status() != WL_CONNECTED ) {
-//    if (millis() - lastWiFiCheckTick > 1000) {
-//      lastWiFiCheckTick = millis();
-//    }
-//  }
-//  //连接成功建立
-//  else {
-//    if (taskStarted == false) {
-//      taskStarted = true;
-//      Serial.print("\r\nGet IP Address: ");
-//      Serial.println(WiFi.localIP());
-//      startTCPClient();
-//    }
-//  }
-//}
-
-//打开灯泡
-void turnOnLed(){
-  Serial.println("Turn ON");
-  analogWrite(LED_Pin, 10);
-}
-//关闭灯泡
-void turnOffLed(){
-  Serial.println("Turn OFF");
-    analogWrite(LED_Pin, 10);
-}
+} 

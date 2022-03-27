@@ -158,8 +158,8 @@ void loop(){
  
  void dht11_out()//显示温湿度
  {
-  u8g2.clearBuffer();
-  u8g2.setFont(u8g2_font_wqy14_t_gb2312);
+   u8g2.clearBuffer();
+  u8g2.setFont(u8g2_font_wqy15_t_gb2312);
   u8g2.setCursor(16*2, 15);
   u8g2.print("环境监测");
 //   read without samples.
@@ -170,13 +170,12 @@ void loop(){
     Serial.print("Read DHT11 failed, err="); Serial.println(err);delay(1000);
     return;
   }
-  delay(50);
 //  Serial.print("Sample OK: ");
 //  Serial.print((float)temperature); Serial.print(" *C, "); 
 //  Serial.print((float)humidity); Serial.println(" H");
-  u8g2.setCursor(0, 15*2);
+  u8g2.setCursor(0, 16*2);
   u8g2.print("实时温度：");
-  u8g2.setCursor(15*5, 15*2);
+  u8g2.setCursor(16*5, 16*2);
   u8g2.print((int)temperature);u8g2.print("*C");
   // u8g2.drawXBM(0, 16, 16, 16, wen);
   // u8g2.drawXBM(0, 16*2, 16, 16, shi);
@@ -184,17 +183,10 @@ void loop(){
   // u8g2.drawXBM(16, 16, 16, 16, du);
 //  u8g2.setCursor(16*3, 16*2);
 //  u8g2.print((int)temperature);
-  u8g2.setCursor(0, 15*3);
+  u8g2.setCursor(0, 16*3);
   u8g2.print("空气湿度：");
-  u8g2.setCursor(15*5, 15*3);
+  u8g2.setCursor(16*5, 16*3);
   u8g2.print((int)humidity); u8g2.print(" H");
-  u8g2.setCursor(0, 15*4);
-  u8g2.print("土壤湿度：");
-  u8g2.setCursor(15*5, 15*4);
-  int counts = analogRead(A0);  //A0接模拟采样口
-  delay(50);
-  u8g2.print(counts);
-  Serial.println(counts);
   u8g2.sendBuffer();
   delay(3000);
 
