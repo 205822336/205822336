@@ -11,7 +11,6 @@
 
 int pinDHT11 = D5;
 SimpleDHT11 dht11(pinDHT11);//用于读的DHT11数据
-
 WiFiUDP Udp;
 unsigned int localPort = 8888; // 用于侦听UDP数据包的本地端口
 
@@ -39,12 +38,12 @@ void dht11_out();
 //
 boolean isNTPConnected = false;
 
-const unsigned char xing[] U8X8_PROGMEM = {
-    0x00, 0x00, 0xF8, 0x0F, 0x08, 0x08, 0xF8, 0x0F, 0x08, 0x08, 0xF8, 0x0F, 0x80, 0x00, 0x88, 0x00,
-    0xF8, 0x1F, 0x84, 0x00, 0x82, 0x00, 0xF8, 0x0F, 0x80, 0x00, 0x80, 0x00, 0xFE, 0x3F, 0x00, 0x00}; /*星*/
-const unsigned char liu[] U8X8_PROGMEM = {
-    0x40, 0x00, 0x80, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0xFF, 0x7F, 0x00, 0x00, 0x00, 0x00,
-    0x20, 0x02, 0x20, 0x04, 0x10, 0x08, 0x10, 0x10, 0x08, 0x10, 0x04, 0x20, 0x02, 0x20, 0x00, 0x00}; /*六*/
+//LED汉字码
+const unsigned char xing[] U8X8_PROGMEM = {0x00, 0x00, 0xF8, 0x0F, 0x08, 0x08, 0xF8, 0x0F, 0x08, 0x08, 0xF8, 0x0F, 0x80, 0x00, 0x88, 0x00,0xF8, 0x1F, 0x84, 0x00, 0x82, 0x00, 0xF8, 0x0F, 0x80, 0x00, 0x80, 0x00, 0xFE, 0x3F, 0x00, 0x00}; /*星*/
+const unsigned char liu[] U8X8_PROGMEM = {0x40, 0x00, 0x80, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0xFF, 0x7F, 0x00, 0x00, 0x00, 0x00,0x20, 0x02, 0x20, 0x04, 0x10, 0x08, 0x10, 0x10, 0x08, 0x10, 0x04, 0x20, 0x02, 0x20, 0x00, 0x00}; /*六*/
+const unsigned char du[] U8X8_PROGMEM={0x80,0x00,0x00,0x01,0xFC,0x7F,0x44,0x04,0x44,0x04,0xFC,0x3F,0x44,0x04,0x44,0x04,0xC4,0x07,0x04,0x00,0xF4,0x0F,0x24,0x08,0x42,0x04,0x82,0x03,0x61,0x0C,0x1C,0x70,/*度*/};
+const unsigned char wen[] U8X8_PROGMEM = {0x00,0x00,0xC4,0x1F,0x48,0x10,0x48,0x10,0xC1,0x1F,0x42,0x10,0x42,0x10,0xC8,0x1F,0x08,0x00,0xE4,0x3F,0x27,0x25,0x24,0x25,0x24,0x25,0x24,0x25,0xF4,0x7F,0x00,0x00};
+const unsigned char shi[] U8X8_PROGMEM = {0x00,0x00,0xE4,0x1F,0x28,0x10,0x28,0x10,0xE1,0x1F,0x22,0x10,0x22,0x10,0xE8,0x1F,0x88,0x04,0x84,0x04,0x97,0x24,0xA4,0x14,0xC4,0x0C,0x84,0x04,0xF4,0x7F,0x00,0x00};
 
 typedef struct
 {                  //存储配置结构体
@@ -123,9 +122,6 @@ void setup(){
   Serial.println("");
   initdisplay();
   // 连接WiFi
-
-  
-  
   u8g2.clearBuffer();
   u8g2.setFont(u8g2_font_unifont_t_chinese2);
   u8g2.setCursor(0, 14);
@@ -137,8 +133,6 @@ void setup(){
   Udp.begin(localPort);
   setSyncProvider(getNtpTime);
   setSyncInterval(300); //每300秒同步一次时间
-
-  
 }
 
 time_t prevDisplay = 0; //当时钟已经显示
@@ -152,47 +146,52 @@ void loop(){
       
     }else if(sta==252){
       threeday();
-      
     }
     else{
         dht11_out();
     }
-
     ++sta;
-
     if(sta==254){
       sta = 0;
     }
 }
  
- void dht11_out()
+ void dht11_out()//显示温湿度
  {
-    int err = SimpleDHTErrSuccess;
+   u8g2.clearBuffer();
+  u8g2.setFont(u8g2_font_wqy15_t_gb2312);
+  u8g2.setCursor(16*2, 15);
+  u8g2.print("环境监测");
+//   read without samples.
+  byte temperature = 0;
+  byte humidity = 0;
+  int err = SimpleDHTErrSuccess;
   if ((err = dht11.read(&temperature, &humidity, NULL)) != SimpleDHTErrSuccess) {
     Serial.print("Read DHT11 failed, err="); Serial.println(err);delay(1000);
     return;
   }
-  Serial.print("Sample OK: ");
-//  Serial.print((int)temperature); Serial.print(" *C, "); 
-//  Serial.print((int)humidity); Serial.println(" H");
-    u8g2.clearBuffer();
-    u8g2.setFont(u8g2_font_unifont_t_chinese2);
-    u8g2.setCursor(0, 14);
-    u8g2.print("温湿度");
-
-    u8g2.setCursor(16, 44);
-    u8g2.print(currentTime);
-    u8g2.setCursor(0, 61);
-    u8g2.setFont(u8g2_font_unifont_t_chinese2);
-    u8g2.print(currentDay);
-    u8g2.drawXBM(80, 48, 16, 16, xing);
-    u8g2.setCursor(95, 62);
-    u8g2.print("期");
-    u8g2.sendBuffer();
-  
-
+//  Serial.print("Sample OK: ");
+//  Serial.print((float)temperature); Serial.print(" *C, "); 
+//  Serial.print((float)humidity); Serial.println(" H");
+  u8g2.setCursor(0, 16*2);
+  u8g2.print("实时温度：");
+  u8g2.setCursor(16*5, 16*2);
+  u8g2.print((int)temperature);u8g2.print("*C");
+  // u8g2.drawXBM(0, 16, 16, 16, wen);
+  // u8g2.drawXBM(0, 16*2, 16, 16, shi);
+  // u8g2.drawXBM(16, 16*2, 16, 16, du);
+  // u8g2.drawXBM(16, 16, 16, 16, du);
+//  u8g2.setCursor(16*3, 16*2);
+//  u8g2.print((int)temperature);
+  u8g2.setCursor(0, 16*3);
+  u8g2.print("空气湿度：");
+  u8g2.setCursor(16*5, 16*3);
+  u8g2.print((int)humidity); u8g2.print(" H");
+  u8g2.sendBuffer();
+  delay(3000);
 
  }
+ 
 // 向心知天气服务器服务器请求信息并对信息进行解析
 void httpRequest(String reqRes,int stat){
   WiFiClient client;
@@ -573,7 +572,7 @@ void oledClockDisplay()
     u8g2.setCursor(0, 44);
     u8g2.print(currentTime);
     u8g2.setCursor(0, 61);
-    u8g2.setFont(u8g2_font_unifont_t_chinese2);
+    u8g2.setFont(u8g2_font_wqy16_t_gb2312);
     u8g2.print(currentDay);
     u8g2.drawXBM(80, 48, 16, 16, xing);
     u8g2.setCursor(95, 62);
@@ -591,6 +590,7 @@ void oledClockDisplay()
     else if (weekdays == 6)
         u8g2.print("五");
     else if (weekdays == 7)
-        u8g2.drawXBM(111, 49, 16, 16, liu);
+        u8g2.print("六");
+//        u8g2.drawXBM(111, 49, 16, 16, liu);
     u8g2.sendBuffer();
 }
