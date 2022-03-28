@@ -12,7 +12,8 @@
 int pinDHT11 = D5;
 SimpleDHT11 dht11(pinDHT11);//用于读的DHT11数据
 WiFiUDP Udp;
-unsigned int localPort = 8888; // 用于侦听UDP数据包的本地端口
+unsigned int localPort =
+8888; // 用于侦听UDP数据包的本地端口
 
 //网络校时的相关配置
 static const char ntpServerName[] = "ntp1.aliyun.com"; //NTP服务器，使用阿里云

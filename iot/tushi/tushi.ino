@@ -174,7 +174,7 @@ dht11_out();
  
  void dht11_out()//显示温湿度
  {
-   u8g2.clearBuffer();
+  u8g2.clearBuffer();
   u8g2.setFont(u8g2_font_wqy14_t_gb2312);
   u8g2.setCursor(16*2, 15);
   u8g2.print("环境监测");
