@@ -1,0 +1,113 @@
+curl 'http://1.1.1.1/' \
+  -H 'Connection: keep-alive' \
+  -H 'Cache-Control: max-age=0' \
+  -H 'Upgrade-Insecure-Requests: 1' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.55' \
+  -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9' \
+  -H 'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6' \
+  -H 'Cookie: username=20310320312; password=47bf1dc3979010a2931c028b0cb3f18a' \
+  -H 'If-None-Match: "41da94aa3ff5d71:0"' \
+  -H 'If-Modified-Since: Mon, 20 Dec 2021 01:19:42 GMT' \
+  --compressed \
+  --insecure ;
+curl 'http://1.1.1.1/Auth.ashx' \
+  -H 'Connection: keep-alive' \
+  -H 'Accept: application/json, text/plain, */*' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.55' \
+  -H 'Content-Type: application/json' \
+  -H 'Origin: http://1.1.1.1' \
+  -H 'Referer: http://1.1.1.1/' \
+  -H 'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6' \
+  -H 'Cookie: username=20310320312; password=47bf1dc3979010a2931c028b0cb3f18a' \
+  --data-raw '{"username":"20310320312","password":"47bf1dc3979010a2931c028b0cb3f18a","remember":true,"DoWhat":"Login"}' \
+  --compressed \
+  --insecure ;
+curl 'http://1.1.1.1/Auth.ashx' \
+  -H 'Connection: keep-alive' \
+  -H 'Accept: application/json, text/plain, */*' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.55' \
+  -H 'Content-Type: application/json' \
+  -H 'Origin: http://1.1.1.1' \
+  -H 'Referer: http://1.1.1.1/' \
+  -H 'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6' \
+  -H 'Cookie: username=20310320312; password=47bf1dc3979010a2931c028b0cb3f18a' \
+  --data-raw '{"DoWhat":"GetInfo"}' \
+  --compressed \
+  --insecure ;
+curl 'http://1.1.1.1/UG-%E5%AD%A6%E7%94%9F%E7%BB%84.png' \
+  --compressed \
+  --insecure ;
+curl 'http://1.1.1.1/static/js/2.1fa50839.chunk.js' \
+  -H 'Referer: http://1.1.1.1/' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.55' \
+  --compressed \
+  --insecure ;
+curl 'http://1.1.1.1/static/js/main.4d9e0cae.chunk.js' \
+  -H 'Referer: http://1.1.1.1/' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.55' \
+  --compressed \
+  --insecure ;
+curl 'http://1.1.1.1/tip.json' \
+  --compressed \
+  --insecure ;
+curl 'http://1.1.1.1/Auth.ashx' \
+  -H 'Connection: keep-alive' \
+  -H 'Accept: application/json, text/plain, */*' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.55' \
+  -H 'Content-Type: application/json' \
+  -H 'Origin: http://1.1.1.1' \
+  -H 'Referer: http://1.1.1.1/' \
+  -H 'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6' \
+  -H 'Cookie: username=20310320312; password=47bf1dc3979010a2931c028b0cb3f18a' \
+  --data-raw '{"DoWhat":"Check"}' \
+  --compressed \
+  --insecure ;
+curl 'http://1.1.1.1/H1300.jpg' \
+  -H 'Referer: http://1.1.1.1/' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.55' \
+  --compressed \
+  --insecure ;
+curl 'http://1.1.1.1/Auth.ashx' \
+  -H 'Connection: keep-alive' \
+  -H 'Accept: application/json, text/plain, */*' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.55' \
+  -H 'Content-Type: application/json' \
+  -H 'Origin: http://1.1.1.1' \
+  -H 'Referer: http://1.1.1.1/' \
+  -H 'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6' \
+  -H 'Cookie: username=20310320312; password=47bf1dc3979010a2931c028b0cb3f18a' \
+  --data-raw '{"DoWhat":"GetInfo"}' \
+  --compressed \
+  --insecure ;
+curl 'http://1.1.1.1/favicon.ico' \
+  --compressed \
+  --insecure ;
+curl 'http://1.1.1.1/UG-%E5%AD%A6%E7%94%9F%E7%BB%84.png' \
+  -H 'Referer: http://1.1.1.1/' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.55' \
+  --compressed \
+  --insecure ;
+curl 'http://1.1.1.1/Auth.ashx' \
+  -H 'Connection: keep-alive' \
+  -H 'Accept: application/json, text/plain, */*' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.55' \
+  -H 'Content-Type: application/json' \
+  -H 'Origin: http://1.1.1.1' \
+  -H 'Referer: http://1.1.1.1/' \
+  -H 'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6' \
+  -H 'Cookie: username=20310320312; password=47bf1dc3979010a2931c028b0cb3f18a' \
+  --data-raw '{"DoWhat":"OpenNet","Package":"学生-电信-100M"}' \
+  --compressed \
+  --insecure ;
+curl 'http://1.1.1.1/Auth.ashx' \
+  -H 'Connection: keep-alive' \
+  -H 'Accept: application/json, text/plain, */*' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.55' \
+  -H 'Content-Type: application/json' \
+  -H 'Origin: http://1.1.1.1' \
+  -H 'Referer: http://1.1.1.1/' \
+  -H 'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6' \
+  -H 'Cookie: username=20310320312; password=47bf1dc3979010a2931c028b0cb3f18a' \
+  --data-raw '{"DoWhat":"GetInfo"}' \
+  --compressed \
+  --insecure
